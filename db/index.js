@@ -5,7 +5,7 @@ const db = mysql.createPool({
     host: '127.0.0.1',
     user: 'root',
     port: 3307,
-    password: '123456',
+    password: 'admin123',
     database: 'handleledger'
 });
 
