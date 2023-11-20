@@ -10,6 +10,20 @@ app.use(cors())
 
 app.use(express.urlencoded({ extended: false }))
 
+
+
+// 导入并使用用户路由模块
+const userRouter = require('./router/user')
+app.use('/api', userRouter)
+
+
+
+
+
+
+
+
+
 //启动服务器
 const server=app.listen(8080, () =>{
     console.log('服务器启动成功，端口号为  http://127.0.0.1:8080')
