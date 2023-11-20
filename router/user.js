@@ -6,7 +6,7 @@ const router = express.Router();
 const userHandler = require('../router_handler/user');
 
 //注册新用户
-router.post('/register', (req, res) => {
+router.post('/reguser', (req, res) => {
     res.send({code: 200, msg: '注册成功'})
 })
    
