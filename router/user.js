@@ -26,6 +26,9 @@ router.post('/login', expressJoi(reg_login_schema), userHandler.login)
 
 router.put('/updatePassword',userHandler.updatePassword)
 
+router.put('/updateAvatar', userHandler.updateAvatar)
+
+
 
 //把路由共享出去
 module.exports = router;

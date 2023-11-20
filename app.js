@@ -3,7 +3,7 @@ const express = require('express')
 // 创建 express 的服务器实例
 const app = express();
 // 导入 joi 模块
-const joi = require('@hapi/joi')
+const joi = require('joi')
 
 //跨域服务，导入cors中间件
 const cors = require('cors')

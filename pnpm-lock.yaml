@@ -23,6 +23,9 @@ dependencies:
   express-jwt:
     specifier: 5.3.3
     version: registry.npmmirror.com/express-jwt@5.3.3
+  joi:
+    specifier: ^17.11.0
+    version: registry.npmmirror.com/joi@17.11.0
   jsonwebtoken:
     specifier: 8.5.1
     version: registry.npmmirror.com/jsonwebtoken@8.5.1
