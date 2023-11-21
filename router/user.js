@@ -28,7 +28,9 @@ router.put('/updatePassword',userHandler.updatePassword)
 
 router.put('/updateAvatar', userHandler.updateAvatar)
 
+router.put('/updateUserInfo', userHandler.updateUserInfo)
 
+// router.get('/getUserInfo', userHandler.getUserInfo)
 
 //把路由共享出去
 module.exports = router;

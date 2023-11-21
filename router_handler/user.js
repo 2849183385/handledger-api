@@ -21,8 +21,8 @@ exports.regUser = (req, res) => {
     // }
 
     //定义sql语句，查询用户是否被占用
-    const sqlStr = 'select * from users where username =?'
-    db.query(sqlStr, [userInfo.username], (err, result) => {
+    const sqlStr = 'select * from users where acount =?'
+    db.query(sqlStr, [userInfo.acount], (err, result) => {
         //执行sql语句失败
         if (err) {
             return res.cc({ status: 1, message: err.message })
@@ -52,8 +52,8 @@ exports.login = (req, res) => {
     // 接收表单的数据
     const userinfo = req.body
     // 定义 SQL 语句
-    const sql = `select * from users where username=?`
-    db.query(sql, userinfo.username, (err, result) => {
+    const sql = `select * from users where acount=?`
+    db.query(sql, userinfo.acount, (err, result) => {
         // 执行 SQL 语句失败
         if (err) {
             return res.cc({ status: 1, message: err.message })
@@ -82,15 +82,32 @@ exports.login = (req, res) => {
         
     }
 
+//更新用户信息的处理函数
+exports.updateUserInfo = (req, res) => {
+    const newInfo = req.body
+    //定义修改用户信息的sql语句
+    const sql = 'update users set nickname=?, user_gender=?, user_age =?, user_tel =?, user_email =? ,user_region =?'
+    db.query(sql, [newInfo.acount, newInfo.user_sex, newInfo.user_age, newInfo.user_tel, newInfo.user_email], (err, result) => {
+        //执行sql语句失败
+        if (err) {
+            return res.cc({ status: 1, message: err.message })
+        }   
+        //判断修改后影响的行数是否为1
+        if (result.affectedRows!== 1) return res.cc('修改用户信息失败，请稍后再试！')
+        //修改成功
+        res.cc({ status: 0, message: '修改用户信息成功' })
+    })
+}
+
 //修改密码的处理函数
 exports.updatePassword = (req, res) => {
     const newInfo = req.body
- 
+
     //调用bcrypt.hashSync()模块，对密码进行加密
     newInfo.newPassword = bcrypt.hashSync(newInfo.newPassword, 10)
     //定义修改密码的sql语句
-    const sql = 'update users set password =? where user_id =?'
-    db.query(sql, [newInfo.newPassword, newInfo.user_id], (err, result) => {
+    const sql = 'update users set password =? where acount =?'
+    db.query(sql, [newInfo.newPassword, newInfo.acount], (err, result) => {
         //执行sql语句失败
         if (err) {
             return res.cc({ status: 1, message: err.message })
@@ -102,21 +119,14 @@ exports.updatePassword = (req, res) => {
     })
 }
 
-//更新用户头像的处理函数
-exports.updateAvatar = (req, res) => {
-    
-    res.send('updateAvatar OK')
-}
-
-
 
 //更换头像的处理函数
 exports.updateAvatar = (req, res) => {
     const userInfo = req.body
 
     //定义更换头像的sql语句
-    const sql = 'update users set user_pic =? where user_id =?'
-    db.query(sql, [userInfo.user_pic, userInfo.user_id], (err, result) => {
+    const sql = 'update users set user_pic =? where acount =?'
+    db.query(sql, [userInfo.user_pic, userInfo.acount], (err, result) => {
         //执行sql语句失败
         if (err) {
             return res.cc({ status: 1, message: err.message })
