@@ -30,18 +30,20 @@ app.use((req, res, next) => {
 const expressJWT = require('express-jwt')
 const config = require('./config')
 
-// 导入并使用用户路由模块
-const userRouter = require('./router/user')
-app.use('/api', userRouter)
 // 使用 .unless({ path: [/^\/api\//] }) 指定哪些接口不需要进行 Token 的身份认证
-app.use(expressJWT({ secret: config.jwtSecretKey }).unless({
-    path: [/^\/api\//]
-}))
+app.use(expressJWT({ secret: config.jwtSecretKey }).unless({ path: [/^\/api\//] }))
 
 
 app.get('/', (req, res) => {
     res.send('Hello, World!');
 });
+
+// 导入并使用用户路由模块
+const userRouter = require('./router/user')
+app.use('/api', userRouter)
+
+const userinfoRouter = require('./router/userInfo')
+app.use('/user', userinfoRouter)
 
 
 // 错误中间件 在最后定义

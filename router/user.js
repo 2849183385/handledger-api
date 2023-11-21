@@ -24,11 +24,7 @@ router.post('/reguser', expressJoi(reg_login_schema), userHandler.regUser)
 router.post('/login', expressJoi(reg_login_schema), userHandler.login)
 
 
-router.put('/updatePassword',userHandler.updatePassword)
 
-router.put('/updateAvatar', userHandler.updateAvatar)
-
-router.put('/updateUserInfo', userHandler.updateUserInfo)
 
 // router.get('/getUserInfo', userHandler.getUserInfo)
 
