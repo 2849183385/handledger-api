@@ -32,8 +32,8 @@ exports.getUserInfo = (req, res) => {
 exports.updateUserInfo = (req, res) => {
     const newInfo = req.body
     //定义修改用户信息的sql语句
-    const sql = 'update users set nickname=?, user_gender=?, user_brithday =?, user_tel =?, user_email =? ,user_region =? where acount = ?'
-    db.query(sql, [newInfo.nickname, newInfo.user_gender, newInfo.user_age, newInfo.user_tel, newInfo.user_email, newInfo.user_region, newInfo.acount], (err, result) => {
+    const sql = 'update users set nick_name=?, user_sex=?, user_brithday =?, user_tel =?, user_email =? ,user_region =? where acount = ?'
+    db.query(sql, [newInfo.nick_name, newInfo.user_sex, newInfo.user_brithday, newInfo.user_tel, newInfo.user_email, newInfo.user_region, newInfo.acount], (err, result) => {
         //执行sql语句失败
         if (err) {
             return res.cc({ status: 1, message: err.message })
