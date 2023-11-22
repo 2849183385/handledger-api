@@ -43,17 +43,18 @@ exports.addTask = (req, res) => {
 };
 
 // 删除任务接口
-exports.deleteTask=(req, res) => {
-    const task_id = req.params.task_id;
+exports.deleteTaskById = (req, res) => {
+    // res.send('删除任务接口')
+    const task_id = req.params.id;
     // 构造删除任务的SQL语句
-    const sql = "DELETE FROM tasks WHERE task_id = ?";
+    const sql = "update tasks set is_delete=1 WHERE task_id = ?";
     const values = [task_id];
     // 执行SQL语句
-    db.query(sql, values, (error, results) => {
-        if (error) {
-            return res.status(500).json({ error: "删除任务失败" });
+    db.query(sql, values, (err, results) => {
+        if (err) {
+            return res.cc({ status: 1, message: err.message })
         }
-        res.json({ message: "任务删除成功" });
+        res.cc({ message: "任务删除成功" });
     });
 };
 
