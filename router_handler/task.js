@@ -59,5 +59,30 @@ exports.deleteTaskById = (req, res) => {
 };
 
 
+//更新任务信息接口
+exports.updateTaskById = (req, res) => {
+    const { task_id, task_title, task_description, due_date, priority, creator_id, cate_id } = req.body;
+    // 构造更新任务的SQL语句
+    const sql = "UPDATE tasks SET task_title = ?, task_description = ?, due_date = ?, priority = ?, creator_id = ?, cate_id = ? WHERE task_id = ?";
+    const values = [task_title, task_description, due_date, priority, creator_id, cate_id, task_id];
+    // 执行SQL语句
+    db.query(sql, values, (err, results) => {
+        if (err) {
+            return res.cc({ status: 1, message: err.message })
+        }
+        res.cc({ message: "任务更新成功" });
+    });
+};
 
-
+//完成任务接口
+exports.finishTaskById = (req, res) => {
+    // 构造更新任务的SQL语句
+    const sql = "UPDATE tasks SET status = ? WHERE task_id =?";
+    // 执行SQL语句
+    db.query(sql, [req.body.status,req.body.task_id], (err, results) => {
+        if (err) {
+            return res.cc({ status: 1, message: err.message })
+        }
+        res.cc({ message: "任务完成成功" });
+    });
+}
