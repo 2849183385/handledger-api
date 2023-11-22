@@ -14,7 +14,7 @@ const bcrypt = require('bcryptjs')
 exports.getUserInfo = (req, res) => {
     // res.cc({ status: 0, message: '查询用户信息成功', data: req.query.acount })
     // 定义查询用户信息的sql语句
-    const sql = 'select user_id,acount,nickname,user_pic,user_email,user_gender,user_region,user_tel,user_brithday from users where acount =?'
+    const sql = 'select user_id,acount,nick_name,user_pic,user_email,user_sex,user_region,user_tel,user_brithday from users where acount =?'
     // 执行sql语句
     db.query(sql, [req.query.acount], (err, result) => {
         //执行sql语句失败

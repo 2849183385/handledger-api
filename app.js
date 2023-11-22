@@ -45,6 +45,8 @@ app.use('/api', userRouter)
 const userinfoRouter = require('./router/userInfo')
 app.use('/user', userinfoRouter)
 
+const taskRouter = require('./router/task')
+app.use('/task', taskRouter)
 
 // 错误中间件 在最后定义
 app.use(function (err, req, res, next) {
