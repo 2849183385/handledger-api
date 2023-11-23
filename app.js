@@ -9,8 +9,15 @@ const joi = require('joi')
 const cors = require('cors')
 //使用cors中间件
 app.use(cors())
+// const bodyParser = require('body-parser')
 
+//转换请求参数  请求体参数是: name=tom&pwd=123
 app.use(express.urlencoded({ extended: false }))
+app.use(express.json())
+// // parse application/x-www-form-urlencoded
+// app.use(bodyParser.urlencoded({ extended: false }))
+// // parse application/json
+// app.use(bodyParser.json())
 
 // 一定要在路由之前，封装 res.cc 函数
 app.use((req, res, next) => {
@@ -52,8 +59,8 @@ app.use('/task', taskRouter)
 app.use(function (err, req, res, next) {
     // 数据验证失败
     if (err instanceof joi.ValidationError) return res.cc(err)
-    // 捕获身份认证失败的错误
-    if (err.name === 'UnauthorizedError') return res.cc('身份认证失败！')
+    // 捕获身份认证失败的错误 返回状态401
+    if (err.name === 'UnauthorizedError') return res.send({status:401, message: '身份认证失败！'})
     // 未知错误
     res.cc(err)
 })

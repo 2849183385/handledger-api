@@ -21,15 +21,15 @@ exports.regUser = (req, res) => {
     // }
 
     //定义sql语句，查询用户是否被占用
-    const sqlStr = 'select * from users where acount =?'
-    db.query(sqlStr, [userInfo.acount], (err, result) => {
+    const sqlStr = 'select * from users where account =?'
+    db.query(sqlStr, [userInfo.account], (err, result) => {
         //执行sql语句失败
         if (err) {
-            return res.cc({ status: 1, message: err.message })
+            return res.send({ status: 1, message: err instanceof Error ? err.message : err, })
         }
         //查询成功，判断用户是否被占用
         if (result.length > 0) {
-            return res.cc('用户名被占用，请更换其他用户名！')
+            return res.send({ status: 1, message: '用户名被占用，请更换其他用户名！' })
         }
         //调用bcrypt.hashSync()模块，对密码进行加密
         userInfo.password = bcrypt.hashSync(userInfo.password, 10)
@@ -38,32 +38,34 @@ exports.regUser = (req, res) => {
         db.query(sql, userInfo, (err, result) => {
             //执行sql语句失败
             if (err) {
-                return res.cc({ status: 1, message: err.message })
+                return res.send({ status: 1, message: err.message })
             }
             //判断插入后影响的行数是否为1
-            if (result.affectedRows !== 1) return res.cc('注册用户失败，请稍后再试！')
+            if (result.affectedRows !== 1) return res.send('注册用户失败，请稍后再试！')
             //插入成功
-             res.cc({ status: 0, message: '注册成功' })
+             res.send( {status: 0, message: '注册成功'} )
         })
     })
 }
 // 登录的处理函数
 exports.login = (req, res) => {
+    // res.send('登录')
     // 接收表单的数据
     const userinfo = req.body
+    // res.send(req.params,req.body,req.query)
     // 定义 SQL 语句
-    const sql = `select * from users where acount=?`
-    db.query(sql, userinfo.acount, (err, result) => {
+    const sql = `select * from users where account=?`
+    db.query(sql, userinfo.account, (err, result) => {
         // 执行 SQL 语句失败
         if (err) {
-            return res.cc({ status: 1, message: err.message })
+            return res.send({ status: 1, message: err.message })
         }
         // 查询成功，判断用户是否存在
-        if (result.length === 0)   return res.cc('用户不存在，请先注册！')
+        if (result.length === 0) return res.send({ status: 1, message: '用户不存在，请先注册！' })
         // 调用 bcrypt.compareSync() 方法，对用户输入的密码进行加密，并与数据库中的密码进行比较
         const isMatch = bcrypt.compareSync(userinfo.password, result[0].password)
         // 密码匹配失败
-        if (!isMatch) return res.cc('密码错误，请重新输入！')
+        if (!isMatch) return res.send('密码错误，请重新输入！')
         // 密码匹配成功
         // 在生成Token 之前，剔除头像和密码的值
         const user = { ...result[0], password: '', user_pic: '' }

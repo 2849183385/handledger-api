@@ -10,11 +10,11 @@ const joi = require('joi')
 */
 
 // 用户名的验证规则
-const acount = joi.string().min(1).max(10).required()
+const account = joi.string().min(1).max(10).required()
 // 密码的验证规则
 const password = joi
     .string()
-    .pattern(/^[\S]{6,12}$/)
+    .pattern(/^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\W_!@#$%^&*`~()-+=]+$)(?![a-z0-9]+$)(?![a-z\W_!@#$%^&*`~()-+=]+$)(?![0-9\W_!@#$%^&*`~()-+=]+$)[a-zA-Z0-9\W_!@#$%^&*`~()-+=]/)
     .required()
 const newPassword = joi
    .string()
@@ -41,7 +41,7 @@ const user_brithday = joi.date()
 exports.reg_login_schema = {
     // 表示需要对 req.body 中的数据进行验证
     body: {
-        acount,
+        account,
         password,
     },
 }
@@ -50,7 +50,7 @@ exports.reg_login_schema = {
 exports.update_userinfo_schema = {
     // 需要对 req.body 里面的数据进行验证
     body: {
-        acount,
+        account,
         nick_name,
         user_email ,
         user_pic,
@@ -66,7 +66,7 @@ exports.update_userinfo_schema = {
 exports.update_password_schema = {
     // 需要对 req.body 里面的数据进行验证
     body: {
-        acount,
+        account,
         password,
         newPassword,
     },
