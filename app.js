@@ -4,7 +4,7 @@ const express = require('express')
 const app = express();
 // 导入 joi 模块
 const joi = require('joi')
-
+const bodyParser = require('body-parser')
 //跨域服务，导入cors中间件
 const cors = require('cors')
 //使用cors中间件
@@ -12,8 +12,8 @@ app.use(cors())
 // const bodyParser = require('body-parser')
 
 //转换请求参数  请求体参数是: name=tom&pwd=123
-app.use(express.urlencoded({ extended: false }))
-app.use(express.json())
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 // // parse application/x-www-form-urlencoded
 // app.use(bodyParser.urlencoded({ extended: false }))
 // // parse application/json
@@ -60,7 +60,7 @@ app.use(function (err, req, res, next) {
     // 数据验证失败
     if (err instanceof joi.ValidationError) return res.cc(err)
     // 捕获身份认证失败的错误 返回状态401
-    if (err.name === 'UnauthorizedError') return res.send({status:401, message: '身份认证失败！'})
+    if (err.name === 'UnauthorizedError') return res.send({status:401, message: '身份认证失败!,请重新登录'})
     // 未知错误
     res.cc(err)
 })

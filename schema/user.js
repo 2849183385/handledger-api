@@ -23,7 +23,7 @@ const newPassword = joi
        
 
 // 定义 id, nickname, email 的验证规则
-const id = joi.number().integer().min(1).required()
+// const id = joi.number().integer().min(1).required()
 //
 
 // 昵称不能为空字符串，长度不超过指定的最大长度
@@ -33,10 +33,12 @@ const user_email = joi.string().email()
 
 // 定义验证 avatar 头像的验证规则
 const user_pic = joi.string()
-const gender = joi.string().valid('0', '1').required()
+const user_sex = joi.number().valid(0, 1)
 const user_tel = joi.string().min(11).max(11)
 const user_region = joi.string()
-const user_brithday = joi.date()
+const user_brithday = joi.string().required()
+const user_motto = joi.string()
+//日期验证规则YYYY-MM-DD
 // 注册和登录表单的验证规则对象
 exports.reg_login_schema = {
     // 表示需要对 req.body 中的数据进行验证
@@ -54,10 +56,11 @@ exports.update_userinfo_schema = {
         nick_name,
         user_email ,
         user_pic,
-        user_sex:gender,
+        user_sex,
         user_brithday,
         user_tel,
-        user_region
+        user_region,
+        user_motto
     },
 }
 

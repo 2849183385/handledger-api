@@ -14,7 +14,7 @@ const bcrypt = require('bcryptjs')
 exports.getUserInfo = (req, res) => {
     // res.cc({ status: 0, message: '查询用户信息成功', data: req.query.acount })
     // 定义查询用户信息的sql语句
-    const sql = 'select user_id,account,nick_name,user_pic,user_email,user_sex,user_region,user_tel,user_brithday from users where account =?'
+    const sql = 'select user_id,account,nick_name,user_pic,user_email,user_sex,user_region,user_tel,user_brithday,user_motto from users where account =?'
     // 执行sql语句
     db.query(sql, [req.query.account], (err, result) => {
         //执行sql语句失败
@@ -24,7 +24,7 @@ exports.getUserInfo = (req, res) => {
         }
         if (result.length === 0) return res.cc('查询用户信息失败，请稍后再试！')
         //查询成功
-        res.cc({ status: 0, message: '查询用户信息成功', data: result[0] })
+        res.send({ status: 0, message: '查询用户信息成功', data: result[0] })
 
     })
 }
@@ -32,16 +32,17 @@ exports.getUserInfo = (req, res) => {
 exports.updateUserInfo = (req, res) => {
     const newInfo = req.body
     //定义修改用户信息的sql语句
-    const sql = 'update users set nick_name=?, user_sex=?, user_brithday =?, user_tel =?, user_email =? ,user_region =? where account = ?'
-    db.query(sql, [newInfo.nick_name, newInfo.user_sex, newInfo.user_brithday, newInfo.user_tel, newInfo.user_email, newInfo.user_region, newInfo.account], (err, result) => {
+    // newInfo.user_region = JSON.stringify(newInfo.user_region)
+    const sql = 'update users set nick_name=?, user_sex=?, user_brithday =?, user_tel =?, user_email =? ,user_region =?,user_motto=? where account = ?'
+    db.query(sql, [newInfo.nick_name, newInfo.user_sex, newInfo.user_brithday, newInfo.user_tel, newInfo.user_email, newInfo.user_region, newInfo.user_motto, newInfo.account], (err, result) => {
         //执行sql语句失败
         if (err) {
-            return res.cc({ status: 1, message: err.message })
+            return res.send({ status: 1, message: err.message })
         }
         //判断修改后影响的行数是否为1
-        if (result.affectedRows !== 1) return res.cc('修改用户信息失败，请稍后再试！')
+        if (result.affectedRows === 0) return res.send({status:1,message:'修改用户信息失败，请稍后再试！',data:result})
         //修改成功
-        res.cc({ status: 0, message: '修改用户信息成功' })
+        res.send({ status: 0, message: '修改用户信息成功', data: newInfo})
     })
 }
 //修改密码的处理函数
@@ -60,7 +61,7 @@ exports.updatePassword = (req, res) => {
         //判断修改后影响的行数是否为1
         if (result.affectedRows !== 1) return res.cc('修改密码失败，请稍后再试！')
         //修改成功
-        res.cc({ status: 0, message: '修改密码成功' })
+        res.send({ status: 0, message: '修改密码成功' })
     })
 }
 //更换头像的处理函数
@@ -72,7 +73,7 @@ exports.updateAvatar = (req, res) => {
     db.query(sql, [userInfo.user_pic, userInfo.account], (err, result) => {
         //执行sql语句失败
         if (err) {
-            return res.cc({ status: 1, message: err.message })
+            return res.cc({ status: 1, message: err instanceof Error ? err.message : err })
         }
         //判断修改后影响的行数是否为1
         if (result.affectedRows !== 1) return res.cc('更换头像失败，请稍后再试！')
