@@ -19,10 +19,10 @@ exports.getUserInfo = (req, res) => {
     db.query(sql, [req.query.account], (err, result) => {
         //执行sql语句失败
         if (err) {
-            return res.cc({ status: 1, message: err.message })
+            return res.send({ status: 1, message: err.message })
             //执行sql语句成功
         }
-        if (result.length === 0) return res.cc('查询用户信息失败，请稍后再试！')
+        if (result.length === 0) return res.send({status:1,message:'查询用户信息失败，请稍后再试！'})
         //查询成功
         res.send({ status: 0, message: '查询用户信息成功', data: result[0] })
 
@@ -56,10 +56,10 @@ exports.updatePassword = (req, res) => {
     db.query(sql, [newInfo.newPassword, newInfo.account], (err, result) => {
         //执行sql语句失败
         if (err) {
-            return res.cc({ status: 1, message: err.message })
+            return res.send({ status: 1, message: err.message })
         }
         //判断修改后影响的行数是否为1
-        if (result.affectedRows !== 1) return res.cc('修改密码失败，请稍后再试！')
+        if (result.affectedRows !== 1) return res.send({status:1,message:'修改密码失败，请稍后再试！'})
         //修改成功
         res.send({ status: 0, message: '修改密码成功' })
     })
@@ -67,18 +67,17 @@ exports.updatePassword = (req, res) => {
 //更换头像的处理函数
 exports.updateAvatar = (req, res) => {
     const userInfo = req.body
-
     //定义更换头像的sql语句
-    const sql = 'update users set user_pic =? where account =?'
-    db.query(sql, [userInfo.user_pic, userInfo.account], (err, result) => {
+    const sql = 'update users set user_pic =? where user_id =?'
+    db.query(sql, [userInfo.user_pic, userInfo.user_id], (err, result) => {
         //执行sql语句失败
         if (err) {
-            return res.cc({ status: 1, message: err instanceof Error ? err.message : err })
+            return res.send({ status: 1, message: err instanceof Error ? err.message : err })
         }
         //判断修改后影响的行数是否为1
-        if (result.affectedRows !== 1) return res.cc('更换头像失败，请稍后再试！')
+        if (result.affectedRows !== 1) return res.send({status:1,message:'更换失败，请稍后再试！'})
         //修改成功
-        res.cc({ status: 0, message: '更换头像成功' })
+        res.send({ status: 0, message: '更换头像成功' })
     })
 }
 

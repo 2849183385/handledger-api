@@ -13,25 +13,27 @@ app.use(cors())
 
 //转换请求参数  请求体参数是: name=tom&pwd=123
 app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+app.use(bodyParser.json({
+    limit: '10mb'
+}))
 // // parse application/x-www-form-urlencoded
 // app.use(bodyParser.urlencoded({ extended: false }))
 // // parse application/json
 // app.use(bodyParser.json())
 
 // 一定要在路由之前，封装 res.cc 函数
-app.use((req, res, next) => {
-    // status 默认值为 1，表示失败的情况
-    // err 的值，可能是一个错误对象，也可能是一个错误的描述字符串
-    // @ts-ignore
-    res.cc = function (err, status = 1) {
-        res.send({
-            status,
-            message: err instanceof Error ? err.message : err,
-        })
-    }
-    next()
-})
+// app.use((req, res, next) => {
+//     // status 默认值为 1，表示失败的情况
+//     // err 的值，可能是一个错误对象，也可能是一个错误的描述字符串
+//     // @ts-ignore
+//     res.cc = function (err, status = 1) {
+//         res.send({
+//             status,
+//             message: err instanceof Error ? err.message : err,
+//         })
+//     }
+//     next()
+// })
 
 // 一定要在路由之前配置解析 Token 的中间件
 const expressJWT = require('express-jwt')
@@ -62,7 +64,7 @@ app.use(function (err, req, res, next) {
     // 捕获身份认证失败的错误 返回状态401
     if (err.name === 'UnauthorizedError') return res.send({status:401, message: '身份认证失败!,请重新登录'})
     // 未知错误
-    res.cc(err)
+    res.send({status:500, message: err.message})
 })
 
 

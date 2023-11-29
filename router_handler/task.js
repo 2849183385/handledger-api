@@ -9,11 +9,11 @@ exports.getTasksById=(req, res) => {
     db.query(sql, req.query.id, (err, results) => {
         //执行sql语句失败
         if (err) {
-            return res.cc({ status: 1, message: err.message })
+            return res.send({ status: 1, message: err.message })
         }
         //执行sql语句成功
         // 返回任务列表
-        if (results.length === 0) return res.cc('查询任务信息失败，请稍后再试')
+        if (results.length === 0) return res.send({ status: 1, message: '查询任务信息失败，请稍后再试' })
         //查询成功
         res.send({ status: 0, message: '查询任务信息成功', data: results })
     });
@@ -29,9 +29,9 @@ exports.addTask = (req, res) => {
     // 执行SQL语句
     db.query(sql, values, (err, results) => {
         if (err) {
-            return res.cc({  message: err.message })
+            return res.send({status: 1,  message: err.message })
         }
-        if (results.affectedRows === 0) return res.cc({ message: '添加任务失败，请稍后再试！', data: results })
+        if (results.affectedRows === 0) return res.send({ status: 1, message: '添加任务失败，请稍后再试！', data: results })
 
         // 返回添加的任务ID
         res.send({ status: 0, message: '添加任务成功', })
@@ -81,9 +81,9 @@ exports.updateTaskStatus = (req, res) => {
     // 执行SQL语句
     db.query(sql, [req.body.status,req.body.task_id,req.body.user_id], (err, results) => {
         if (err) {
-            return res.cc({  message: err.message })
+            return res.send({ status: 1, message: err.message })
         }
-        if (results.affectedRows === 0) return res.cc({ message: '修改用户信息失败，请稍后再试！', data: results })
+        if (results.affectedRows === 0) return res.send({ status: 1, message: '修改用户信息失败，请稍后再试！', data: results })
         res.send({ status:0,message: "已完成任务" });
     });
 }
