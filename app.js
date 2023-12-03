@@ -57,6 +57,9 @@ app.use('/user', userinfoRouter)
 const taskRouter = require('./router/task')
 app.use('/task', taskRouter)
 
+const ledgerRouter = require('./router/ledger')
+app.use('/ledger', ledgerRouter)
+
 // 错误中间件 在最后定义
 app.use(function (err, req, res, next) {
     // 数据验证失败
