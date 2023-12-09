@@ -16,5 +16,7 @@ router.post('/updateAvatar', userinfo_handler.updateAvatar)
 // 修改个人信息
 router.put('/updateUserInfo', expressJoi(update_userinfo_schema), userinfo_handler.updateUserInfo)
 
+//获取用户点赞数据
+router.get('/getLikes', userinfo_handler.getLikes)
 
 module.exports = router

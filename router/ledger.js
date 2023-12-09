@@ -6,7 +6,7 @@ const ledger_Handler = require('../router_handler/ledger');
 router.get('/getLedger', ledger_Handler.getLedger);
 router.post('/publishLedger', ledger_Handler.publishLedger)
 //评论
-router.get('/getComments', ledger_Handler.getLComments)
+router.get('/getComments', ledger_Handler.getComments)
 router.post('/publishComment', ledger_Handler.publishComment)
 //点赞
 router.get('/getLikes', ledger_Handler.getLikes)

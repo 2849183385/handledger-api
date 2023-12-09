@@ -11,22 +11,52 @@ const bcrypt = require('bcryptjs')
 // //  导入需要的验证规则对象
 
 //获取用户信息的处理函数
-exports.getUserInfo = (req, res) => {
-    // res.cc({ status: 0, message: '查询用户信息成功', data: req.query.acount })
-    // 定义查询用户信息的sql语句
-    const sql = 'select user_id,account,nick_name,user_pic,user_email,user_sex,user_region,user_tel,user_brithday,user_motto from users where account =?'
-    // 执行sql语句
-    db.query(sql, [req.query.account], (err, result) => {
-        //执行sql语句失败
-        if (err) {
-            return res.send({ status: 1, message: err.message })
-            //执行sql语句成功
+exports.getUserInfo =async (req, res) => {
+    try {
+        // 定义查询用户信息的sql语句
+        const sql = `select users.* from users where account =? `
+        const sql1 = `select  likes.post_id FROM likes WHERE likes.user_id = ?  AND likes.post_id IS NOT NULL `
+        const sql2 = `select  likes.comments_id ROFM likes WHERE likes.comments_id =?  AND likes.comments_id IS NOT NULL `
+        let userInfo = null
+        // 执行sql语句
+        userInfo = await new Promise((resolve, reject) => {
+            db.query(sql, [req.query.account], (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+        // const postLikes = await new Promise((resolve, reject) => {
+        //     db.query(sql1, [req.query.account], (err, result) => {
+        //         if (err) {
+        //             reject(err);
+        //         } else {
+        //             resolve(result);
+        //         }
+        //     });
+        // });
+        // const commentsLikes = await new Promise((resolve, reject) => {
+        //     db.query(sql2, [req.query.account], (err, result) => {
+        //         if (err) {
+        //             reject(err);
+        //         } else {
+        //             resolve(result);
+        //         }
+        //     });
+        // });
+        if (userInfo.length === 0) {
+            return res.send({ status: 1, message: '查询用户信息失败，请稍后再试！' });
         }
-        if (result.length === 0) return res.send({status:1,message:'查询用户信息失败，请稍后再试！'})
-        //查询成功
-        res.send({ status: 0, message: '查询用户信息成功', data: result[0] })
+        // userInfo[0].postLikes = postLikes
 
-    })
+        // 查询成功
+        res.send({ status: 0, message: '查询用户信息成功', data: userInfo[0] });
+    } catch (err) {
+        res.send({ status: 1, message: err.message });
+    }
+   
 }
 //更新用户信息的处理函数
 exports.updateUserInfo = (req, res) => {
@@ -81,3 +111,47 @@ exports.updateAvatar = (req, res) => {
     })
 }
 
+exports.getLikes = async (req, res) => {
+    try {
+        const post = `select likes.post_id FROM likes WHERE likes.user_id =?  AND likes.post_id IS NOT NULL `
+        const comment = `select DISTINCT likes.comment_id From likes WHERE likes.user_id =?  AND likes.comment_id IS NOT NULL `
+        const reply =`select DISTINCT likes.reply_id from likes WHERE likes.user_id =?  AND likes.reply_id IS NOT NULL `
+        const postRes = await new Promise((resolve, reject) => {
+            db.query(post, [req.query.user_id], (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        })
+        const commentRes= await new Promise((resolve, reject) => {
+            db.query(comment, [req.query.user_id], (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        })
+        const replyRes = await new Promise((resolve, reject) => {
+            db.query(reply, [req.query.user_id], (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        })
+        const postid = postRes.map(item => item.post_id)
+        const commentid = commentRes.map(item => item.comment_id)
+        const replyid = replyRes.map(item => item.reply_id)
+        // if (postLikes.length === 0 && commentLikes.length === 0 && replyLikes.length === 0) {
+        //     return res.send({ status: 1, message: '查询用户信息失败，请稍后再试！' });
+        // }
+        res.send({ status: 0, message: '查询用户信息成功',data:{ postid, commentid, replyid } })
+    }
+    catch (err) {
+        res.send({ status: 1, message: err.message });
+    }
+}
