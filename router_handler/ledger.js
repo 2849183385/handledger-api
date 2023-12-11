@@ -70,7 +70,7 @@ exports.getLedger = (req, res) => {
             //执行sql语句成功
             // 返回任务列表
             if (result1.length === 0) return res.send()
-            res.send({ status: 0, message: '查询任务信息成功', data: { postInfo: result, userInfo: result1 } })
+            res.send({ status: 0, message: '查询任务信息成功', data: { article: { ...result[0], ...result1[0] } } })
         })
     })
 }
@@ -94,7 +94,8 @@ exports.publishComment = (req, res) => {
 // 获取评论列表
 exports.getComments = (req, res) => {
     const comment_post_id = req.query.id
-   
+    const limit = req.query.limit
+    const offset = req.query.offset
     const sql = `SELECT c.* , u.user_id ,u.user_pic,u.nick_name,u.account,
                         (SELECT COUNT(*) FROM replies WHERE reply_comment_id = c.comment_id) AS reply_count
                 FROM
@@ -102,9 +103,10 @@ exports.getComments = (req, res) => {
                 left JOIN
                     users u ON c.comment_user_id = u.user_id
                 where
-                c.comment_post_id =?`;
+                c.comment_post_id =?
+                limit ? offset ?`;
     
-    db.query(sql, comment_post_id, (err, result) => {
+    db.query(sql, [comment_post_id, parseInt(limit),parseInt(offset)], (err, result) => {
         if (err) {
             // 执行sql语句失败
             return res.send({ status: 1, message: err.message })
@@ -137,7 +139,7 @@ exports.publishReply = (req, res) => {
 }
 // 获取回复列表
 exports.getReply = (req, res) => {
-    const {id, limit } = req.query;
+    const {id, limit ,offset} = req.query;
     // const offset = req.query.offset; 
     const sql = `SELECT r.*,u.user_pic,u.nick_name,u.account,
                         u2.nick_name AS replied_user_nick_name,
@@ -150,15 +152,15 @@ exports.getReply = (req, res) => {
                     users u2 ON u2.user_id=r.replied_user_id
                 where 
 	                r.reply_comment_id=?
-                limit ? `;
-    db.query(sql, [id,id, parseInt(limit)], (err, result) => {
+                limit ? offset ?`;
+    db.query(sql, [id, id, parseInt(limit), parseInt(offset)], (err, result) => {
         if (err) {
             // 执行sql语句失败
             return res.send({ status: 1, message: err.message })
         }
         //执行sql语句成功
         // 返回任务列表
-        // if (result.length === 0) return res.send({ status: 0, message: '该评论没有回复' })
+        if (result.length === 0) return res.send({ status: 0, message: '该评论没有回复' })
         // 查询成功
         res.send({ status: 0, message: '查询任务信息成功', data: result })
     })
@@ -185,15 +187,11 @@ exports.publishLike = (req, res) => {
             sql1 = ` INSERT INTO likes (user_id, reply_id) VALUES (?,?) `;
             // 执行userSql
             break;
-        // case 'reply_id':
-        //     sql = `INSERT INTO likes (reply_id, counts) VALUES (?,?) 1`;
-        //     // 执行replySql
-        //     break;
         default:
         // 处理未知的字段名
     }
     // sql = `INSERT INTO comment_likes (comment_id, user_id) VALUES (?,?)`;
-    db.query(sql, [id, user_id, id, user_id], (err, result) => {
+    db.query(sql, [id, user_id], (err, result) => {
         if (err) {
             // 执行sql语句失败
             return res.send({ status: 1, message: err.message, data: [id, user_id, sql] })
@@ -215,21 +213,82 @@ exports.publishLike = (req, res) => {
         });
     })
 }
-// 获取点赞列表
-exports.getLikes = (req, res) => {
-    const sql = 'SELECT * FROM likes';
-    db.query(sql, (err, result) => {
+//取消点赞
+exports.cancelLikes = async (req, res) => {
+    try {
+        const { id, user_id, method } = req.body;
+        let sql = "";
+        let sql1 = "";
+        switch (method) {
+            case 'comment':
+                sql = `delete from comment_likes where user_id=? and comment_id =?`
+                sql1 = `delete from likes where user_id=? and comment_id =?`
+                // 执行commentSql
+                break;
+            case 'post':
+                sql = `delete from post_likes where user_id=? and post_id =?`
+                sql1 = `delete from likes where user_id=? and post_id =? `
+                // 执行postSql
+                break;
+            case 'reply':
+                sql = `delete from reply_likes where user_id=? and reply_id =?`
+                sql1 = `delete from likes where user_id=? and reply_id =? `
+                // 执行userSql
+                break;
+            default:
+        }
+            db.query(sql, [user_id, id], (err, result) => {
+                if (err) {
+                  return  res.send({ status: 1, message: err.message })
+                } 
+                if (result.affectedRows === 0) return res.send({ status: 1, message: '取消失败，请稍后再试' ,data:result})
+                db.query(sql1, [user_id, id], (err, result) => {
+                    if (err) {
+                        return  res.send({ status: 1, message: err.message })
+                    } 
+                    if (result.affectedRows === 0) res.send({ status: 1, message: '取消失败，请稍后再试' })
+                    res.send({ status: 0, message: '取消成功' })
+                });
+            });
+    }
+    catch (err) {
+        res.send({ status: 1, message: err.message });
+    }
+}
+
+//获取点赞详情
+exports.getLike = (req, res) => {
+    const { id, method } = req.query;
+    let sql = "";
+    switch (method) {
+        case 'comment':
+            sql = `SELECT comment_likes_count FROM comments WHERE comment_id =?`;
+            // 执行commentSql
+            break;
+        case 'post':
+            sql = `SELECT post_likes_count FROM posts WHERE post_id =?`;
+            // 执行postSql
+            break;
+        case'reply':
+            sql = `SELECT reply_likes_count FROM replies WHERE reply_id =?`;
+            // 执行userSql
+            break;
+        default:
+    }
+    db.query(sql, [id], (err, result) => {
         if (err) {
             // 执行sql语句失败
             return res.send({ status: 1, message: err.message })
         }
         //执行sql语句成功
         // 返回任务列表
-        if (result.length === 0) return res.send({ status: 1, message: '查询任务信息失败，请稍后再试' })
+        if (result.length === 0) return res.send({ status: 1, message: err.message || '查询为空'})
         // 查询成功
-        res.send({ status: 0, message: '查询任务信息成功', data: result })
-    });
+        res.send({ status: 0, message: '查询任务信息成功', data: result[0] })
+    })
 }
+
+
 
 // 发布收藏
 exports.publishFavorites = (req, res) => {
@@ -263,30 +322,30 @@ exports.getFavorites = (req, res) => {
     });
 }
 
-//回复的点赞
-exports.publishReplyLike = (req, res) => {
-    const { reply_id, user_id } = req.body;
-    const sql = 'INSERT INTO reply_likes (reply_id,user_id) VALUES (?,?)';
-    db.query(sql, [reply_id, user_id], (err, result) => {
-        if (err) {
-            return res.send({ status: 1, message: err.message })
+// //回复的点赞
+// exports.publishReplyLike = (req, res) => {
+//     const { reply_id, user_id } = req.body;
+//     const sql = 'INSERT INTO reply_likes (reply_id,user_id) VALUES (?,?)';
+//     db.query(sql, [reply_id, user_id], (err, result) => {
+//         if (err) {
+//             return res.send({ status: 1, message: err.message })
 
-        }
-        if (result.length === 0) return res.send({ status: 1, message: '添加失败，请稍后再试' })
-        res.send({ status: 0, message: '添加成功' })
-    })
-}
-//获取回复点赞
-exports.getReplyLikes = (req, res) => {
-    const sql = 'SELECT * FROM reply_likes';
-    db.query(sql, (err, result) => {
-        if (err) {
-            // 执行sql语句失败
-            return res.send({ status: 1, message: err.message })
-        }
-        //执行sql语句成功
-        // 返回任务列表
-        if (result.length === 0) return res.send({ status: 1, message: '查询任务信息失败，请稍后再试' })
-        res.send({ status: 0, message: '查询任务信息成功', data: result })
-    })
-}
+//         }
+//         if (result.length === 0) return res.send({ status: 1, message: '添加失败，请稍后再试' })
+//         res.send({ status: 0, message: '添加成功' })
+//     })
+// }
+// //获取回复点赞
+// exports.getReplyLikes = (req, res) => {
+//     const sql = 'SELECT * FROM reply_likes';
+//     db.query(sql, (err, result) => {
+//         if (err) {
+//             // 执行sql语句失败
+//             return res.send({ status: 1, message: err.message })
+//         }
+//         //执行sql语句成功
+//         // 返回任务列表
+//         if (result.length === 0) return res.send({ status: 1, message: '查询任务信息失败，请稍后再试' })
+//         res.send({ status: 0, message: '查询任务信息成功', data: result })
+//     })
+// }

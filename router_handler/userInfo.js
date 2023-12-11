@@ -113,7 +113,7 @@ exports.updateAvatar = (req, res) => {
 
 exports.getLikes = async (req, res) => {
     try {
-        const post = `select likes.post_id FROM likes WHERE likes.user_id =?  AND likes.post_id IS NOT NULL `
+        const post = `select DISTINCT likes.post_id FROM likes WHERE likes.user_id =?  AND likes.post_id IS NOT NULL `
         const comment = `select DISTINCT likes.comment_id From likes WHERE likes.user_id =?  AND likes.comment_id IS NOT NULL `
         const reply =`select DISTINCT likes.reply_id from likes WHERE likes.user_id =?  AND likes.reply_id IS NOT NULL `
         const postRes = await new Promise((resolve, reject) => {
@@ -149,9 +149,10 @@ exports.getLikes = async (req, res) => {
         // if (postLikes.length === 0 && commentLikes.length === 0 && replyLikes.length === 0) {
         //     return res.send({ status: 1, message: '查询用户信息失败，请稍后再试！' });
         // }
-        res.send({ status: 0, message: '查询用户信息成功',data:{ postid, commentid, replyid } })
+        res.send({ status: 0, message: '查询点赞信息成功',data:{ postid, commentid, replyid } })
     }
     catch (err) {
         res.send({ status: 1, message: err.message });
     }
 }
+
