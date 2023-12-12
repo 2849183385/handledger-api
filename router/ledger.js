@@ -8,11 +8,11 @@ router.post('/publishLedger', ledger_Handler.publishLedger)
 //评论
 router.get('/getComments', ledger_Handler.getComments)
 router.post('/publishComment', ledger_Handler.publishComment)
-
+router.get('/getLatestComment', ledger_Handler.getLatestComment)
 //回复
 router.get('/getReply', ledger_Handler.getReply)
 router.post('/publishReply', ledger_Handler.publishReply)
-
+router.get('/getLatestReply', ledger_Handler.getLatestReply)
 //点赞
 router.post('/publishLike', ledger_Handler.publishLike)
 router.post('/cancelLikes', ledger_Handler.cancelLikes)

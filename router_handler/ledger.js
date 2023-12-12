@@ -91,12 +91,36 @@ exports.publishComment = (req, res) => {
         res.send({ status: 0, message: '添加成功' })
     });
 };
+//获取最新评论
+exports.getLatestComment = (req, res) => {
+    const sql = `SELECT c.* , u.user_id ,u.user_pic,u.nick_name,u.account
+                FROM 
+                    comments c
+                LEFT JOIN 
+                    users u ON u.user_id = c.comment_user_id
+                WHERE 
+                    comment_created_time >= (NOW() - INTERVAL 1 MINUTE) and comment_post_id =?
+                ORDER BY 
+                    comment_created_time 
+                DESC `;
+    db.query(sql,[req.query.post_id], (err, result) => {
+        if (err) {
+            // 执行sql语句失败
+            return res.send({ status: 1, message: err.message })
+        }
+        //执行sql语句成功
+        // 返回任务列表
+        if (result.length === 0) return res.send({ status: 204, message: '查询任务信息失败，请稍后再试'})
+        // 查询成功
+        res.send({ status: 0, message: '查询任务信息成功', data: result })
+    })
+}
 // 获取评论列表
 exports.getComments = (req, res) => {
     const comment_post_id = req.query.id
     const limit = req.query.limit
     const offset = req.query.offset
-    const sql = `SELECT c.* , u.user_id ,u.user_pic,u.nick_name,u.account,
+    const sql = `SELECT c.* , u.user_id ,u.user_pic,u.nick_name,
                         (SELECT COUNT(*) FROM replies WHERE reply_comment_id = c.comment_id) AS reply_count
                 FROM
                     comments c
@@ -105,7 +129,16 @@ exports.getComments = (req, res) => {
                 where
                 c.comment_post_id =?
                 limit ? offset ?`;
-    
+    //获取评论时间在最近五分钟的评论，和评论中点赞最多的评论
+//     (SELECT * FROM comments
+// WHERE comment_created_time >= (NOW() - INTERVAL 5 MINUTE)
+// ORDER BY comment_created_time DESC
+// LIMIT 1)
+//     UNION
+//         (SELECT * FROM comments
+// WHERE comment_created_time < (NOW() - INTERVAL 5 MINUTE)
+// ORDER BY comment_likes_count DESC
+// LIMIT 4);
     db.query(sql, [comment_post_id, parseInt(limit),parseInt(offset)], (err, result) => {
         if (err) {
             // 执行sql语句失败
@@ -115,7 +148,7 @@ exports.getComments = (req, res) => {
         // 返回任务列表
         if (result.length === 0) return res.send({ status: 1, message: '查询任务信息为空，请稍后再试',data:result })
         // 查询成功
-      res.send({ status: 0, message: '查询任务信息成功', data: result })
+      res.send({ status: 200, message: '查询任务信息成功', data: result })
     });
     
 };
@@ -135,6 +168,33 @@ exports.publishReply = (req, res) => {
         if (result.affectedRows === 0) return res.send({ status: 1, message: '添加失败，请稍后再试' })
         // 查询成功
         res.send({ status: 0, message: '添加成功' })
+    })
+}
+//获取最新回复
+exports.getLatestReply = (req, res) => {
+    const sql = `SELECT r.*, u.user_id,u.user_pic,u.nick_name,u.account,
+                        u2.nick_name AS replied_user_nick_name,
+                        (SELECT COUNT(*) FROM replies WHERE reply_comment_id = ?) AS reply_count
+                        FROM 
+	                    replies r
+                LEFT JOIN 
+                    users u ON u.user_id=r.reply_user_id
+                LEft JOIN
+                    users u2 ON u2.user_id=r.replied_user_id
+                where 
+	                r.reply_time >= (NOW() - INTERVAL 5 MINUTE) and  r.reply_comment_id=?
+                ORDER BY
+                    r.reply_time
+                DESC`;
+    db.query(sql, [req.query.comment_id, req.query.comment_id], (err, result) => {
+        if (err) {
+            // 执行sql语句失败
+            return res.send({ status: 1, message: err.message })
+        }
+        //执行sql语句成功
+        // 返回任务列表
+        if (result.length === 0) return res.send({ status: 204, message: '查询任务信息为空' })
+        res.send({ status: 0, message: '查询任务信息成功', data: result })
     })
 }
 // 获取回复列表

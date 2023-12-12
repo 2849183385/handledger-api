@@ -63,7 +63,7 @@ app.use('/ledger', ledgerRouter)
 // 错误中间件 在最后定义
 app.use(function (err, req, res, next) {
     // 数据验证失败
-    if (err instanceof joi.ValidationError) return res.cc(err)
+    if (err instanceof joi.ValidationError) return res.send({status:400,message:err})
     // 捕获身份认证失败的错误 返回状态401
     if (err.name === 'UnauthorizedError') return res.send({status:401, message: '身份认证失败!,请重新登录'})
     // 未知错误
