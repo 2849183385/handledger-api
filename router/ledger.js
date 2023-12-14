@@ -18,10 +18,10 @@ router.post('/publishLike', ledger_Handler.publishLike)
 router.post('/cancelLikes', ledger_Handler.cancelLikes)
 router.get('/getLike', ledger_Handler.getLike)
 //收藏
-router.get('/getFavorites', ledger_Handler.getFavorites)
-router.post('/publishFavorites', ledger_Handler.publishFavorites)
-
-
+router.post('/publishFavorite', ledger_Handler.publishFavorite)
+router.post('/cancelFavorite', ledger_Handler.cancelFavorite)
+//删除
+router.post('/deleteComment', ledger_Handler.deleteComment)
 
 // //回复·点赞
 // router.get('/getReplyLikes', ledger_Handler.getReplyLikes)
