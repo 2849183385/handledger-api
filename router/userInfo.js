@@ -19,4 +19,9 @@ router.put('/updateUserInfo', expressJoi(update_userinfo_schema), userinfo_handl
 //获取用户点赞数据
 router.get('/getLikes', userinfo_handler.getLikes)
 
+//获取用户收藏数据
+router.get('/getFavorites', userinfo_handler.getFavorites)
+
+//获取用户作品数据
+router.get('/getPosts', userinfo_handler.getPosts)
 module.exports = router
