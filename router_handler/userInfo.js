@@ -144,13 +144,13 @@ exports.getLikes = async (req, res) => {
                 }
             });
         })
-        const postid = postRes.map(item => item.post_id)
-        const commentid = commentRes.map(item => item.comment_id)
-        const replyid = replyRes.map(item => item.reply_id)
+        const postId = postRes.map(item => item.post_id)
+        const commentId = commentRes.map(item => item.comment_id)
+        const replyId = replyRes.map(item => item.reply_id)
         // if (postLikes.length === 0 && commentLikes.length === 0 && replyLikes.length === 0) {
         //     return res.send({ status: 1, message: '查询用户信息失败，请稍后再试！' });
         // }
-        res.send({ status: 0, message: '查询点赞信息成功', data: { postid, commentid, replyid } })
+        res.send({ status: 0, message: '查询点赞信息成功', data: { postId, commentId, replyId } })
     }
     catch (err) {
         res.send({ status: 1, message: err.message });
@@ -159,24 +159,40 @@ exports.getLikes = async (req, res) => {
 
 // 获取收藏列表
 exports.getFavorites = (req, res) => {
-    const sql = 'SELECT DISTINCT post_id FROM Favorites where user_id =?';
-    db.query(sql, req.query.user_id, (err, result) => {
+    // const sql = 'SELECT DISTINCT post_id FROM Favorites where user_id =?';
+    // db.query(sql, req.query.user_id, (err, result) => {
+    //     if (err) {
+    //         // 执行sql语句失败
+    //         return res.send({ status: 1, message: err.message })
+    //     }
+    //     //执行sql语句成功
+    //     // 返回任务列表
+
+    //     // 查询成功
+    //     result = result.map(item => item.post_id)
+    //     res.send({ status: 0, message: '查询任务信息成功', data: result })
+    // });
+    const { user_id } = req.query;
+    const sql = `SELECT *
+                FROM 
+                    posts
+                INNER JOIN 
+                    favorites ON posts.post_id = favorites.post_id
+                WHERE
+                    favorites.user_id = ?`;
+    db.query(sql, [user_id], (err, result) => {
         if (err) {
             // 执行sql语句失败
             return res.send({ status: 1, message: err.message })
         }
-        //执行sql语句成功
-        // 返回任务列表
-
-        // 查询成功
-        result = result.map(item => item.post_id)
-        res.send({ status: 0, message: '查询任务信息成功', data: result })
-    });
+        if (result.length === 0) return res.send({ status: 0, message: '收藏为空' })
+        res.send({ status: 0, message: '查询点赞列表成功', data: result })
+    })
 }
 
 //获取用户作品
 exports.getPosts = (req, res) => {
-    const sql = 'SELECT * FROM posts where post_user_id =?';
+    const sql = 'SELECT * FROM posts where post_user_id =? and post_status=0';
     db.query(sql, req.query.user_id, (err, result) => {
         if (err) {
             // 执行sql语句失败

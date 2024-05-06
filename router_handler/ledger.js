@@ -16,13 +16,13 @@ exports.publishLedger = (req, res) => {
         // 返回任务列表
         if (result.affectedRows === 0) return res.send({ status: 1, message: '添加失败，请稍后再试' })
         // 查询成功
-        res.send({ status: 0, message: '添加成功' })
+        res.send({ status: 0, message: '添加成功'  })
     });
 };
 // 获取文章详情
 exports.getLedger = (req, res) => {
     const post_id = req.query.id
-    const sql = `select * ,(select count(*) from comments where comment_post_id=? and comment_status=0) as comment_count from posts where post_id= ?`
+    const sql = `select * ,(select count(*) from comments where comment_post_id=? and comment_status=0) as comment_count from posts where post_id= ? `
     //一次返回这个作品所有数据，有数据冗余
     /*  const sql = `SELECT  p.*, c.*, r.*,
                   postUser.user_pic AS post_user_pic,postUser.user_id AS post_user_id,postUser.nick_name AS post_nick_name,
@@ -75,6 +75,43 @@ exports.getLedger = (req, res) => {
         })
     })
 }
+
+//获取文章列表
+exports.getLedgerList = (req, res) => {
+    const { limit ,offset} = req.query;
+    const sql = `SELECT * from posts where post_status = 0 order by post_likes_count desc limit ? offset ?`
+    db.query(sql, [parseInt(limit), parseInt(offset)],(err, result) => {
+        if (err) {
+            // 执行sql语句失败
+            return res.send({ status: 1, message: err.message })
+        }
+        //执行sql语句成功
+        // 返回任务列表
+        if (result.length === 0) return res.send({ status: 1, message: '查询任务信息失败，请稍后再试' })
+        // 查询成功
+        res.send({ status: 0, message: '查询任务信息成功', data: result })
+        // res.send({ status: 0, message: '查询任务信息成功', data: { article: {...result[0],...result1[0] } } })
+    })
+}
+                  
+//删除文章
+exports.deleteLedger = (req, res) => {
+    const { post_id } = req.body;
+    const sql = 'UPDATE posts SET post_status = 1 WHERE post_id=?';
+    db.query(sql, post_id, (err, result) => {
+        if (err) {
+            // 执行sql语句失败
+            return res.send({ status: 1, message: err.message })
+        }
+        //执行sql语句成功
+        if (result.affectedRows === 0) return res.send({ status: 1, message: '删除失败，请稍后再试' })
+        // 查询成功
+        res.send({ status: 0, message: '删除成功' })
+
+    });
+}
+
+
 
 // 发布评论
 exports.publishComment = (req, res) => {
@@ -239,7 +276,7 @@ exports.getLatestReply = (req, res) => {
 }
 // 获取回复列表
 exports.getReply = (req, res) => {
-    const { id, limit, offset } = req.query;
+    const { comment_id, limit, offset } = req.query;
     // const offset = req.query.offset; 
     const sql = `SELECT r.*,u.user_pic,u.nick_name,u.account,
                         u2.nick_name AS replied_user_nick_name
@@ -252,7 +289,7 @@ exports.getReply = (req, res) => {
                 where 
 	                r.reply_comment_id=? and reply_status=0
                 limit ? offset ?`;
-    db.query(sql, [id, parseInt(limit), parseInt(offset)], (err, result) => {
+    db.query(sql, [comment_id, parseInt(limit), parseInt(offset)], (err, result) => {
         if (err) {
             // 执行sql语句失败
             return res.send({ status: 1, message: err.message })
@@ -387,6 +424,27 @@ exports.getLike = (req, res) => {
     })
 }
 
+//获取用户点赞作品列表
+exports.getLikesList = (req,res) => {
+    const { user_id,limit,offset } = req.query;
+    const sql = `SELECT posts.*
+                FROM 
+                    posts
+                INNER JOIN 
+                    likes ON likes.post_id =posts.post_id
+                WHERE
+                    likes.user_id = ?
+                    limit ? offset ?`;
+    db.query(sql, [user_id, parseInt(limit), parseInt(offset)], (err, result) => {
+        if (err) {
+            // 执行sql语句失败
+            return res.send({ status: 1, message: err.message })
+        }
+        if (result.length === 0) return res.send({ status: 0, message: '收藏为空' })
+        res.send({ status: 0, message: '查询点赞列表成功', data: result})
+    })
+}
+
 // 发布收藏
 exports.publishFavorite = (req, res) => {
     const { post_id, user_id } = req.body;
@@ -437,4 +495,24 @@ exports.cancelFavorite = (req, res) => {
         })
     })
 
+}
+
+//获取收藏列表
+exports.getFavoritesList = (req, res) => {
+    const { user_id } = req.query;
+    const sql =`SELECT *
+                FROM 
+                    posts
+                INNER JOIN 
+                    favorites ON posts.post_id = favorites.post_id
+                WHERE
+                    favorites.user_id = ?`;
+    db.query(sql, [user_id], (err, result) => {
+        if (err) {
+            // 执行sql语句失败
+            return res.send({ status: 1, message: err.message })
+        }
+        if (result.length === 0) return res.send({ status: 0, message: '收藏为空' })
+        res.send({ status: 0, message: '查询收藏成功', data: result })
+    })
 }
